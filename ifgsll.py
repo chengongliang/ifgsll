@@ -57,7 +57,7 @@ def getPID(host, project):
 	p = Popen(salt_cmd, stdout=PIPE, stderr=PIPE, shell=True)
 	stdout, stderr = p.communicate()
 	if stderr.split(': ')[0] != 'ERROR':
-		pid = stdout.split('\n')[1].strip().split(' ')[6]
+		pid = stdout.split('\n')[1].strip().split(' ')[5]
 		return pid
 	else:
 		print "程序未运行。"
