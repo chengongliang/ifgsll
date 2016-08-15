@@ -119,11 +119,11 @@ def main():
 	if cmd == 'rsync':
 		br = BR(project, destDir)
 		testServer = '192.168.11.110'
+		br.backup(project, destDir, exclude)
 		if env == 'www':
 			rsync(testServer, destDir, exclude)
 		elif env == 'tomcat':
 			rsync(testServer, destDir, exclude)
-		br.backup(project, destDir, exclude)
 	elif cmd == 'update':
 		hostname = parseHost(host)
 		tmpDir = dirinfo.get(project)['tmp']
