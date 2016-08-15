@@ -1,6 +1,5 @@
 #!/usr/bin/python
 #coding:utf8
-#author:chengongliang
 
 import os
 import sys
@@ -8,22 +7,6 @@ import yaml
 from optparse import OptionParser
 
 cwd = os.getcwd()
-def opt():
-	parser = OptionParser()
-	parser.add_option('-p','--porject',
-					dest='project',
-					action='store',
-					help='order,temorder')
-	parser.add_option('-l','--host',
-					dest='host',
-					action='store',
-					help='host')
-	parser.add_option('-c','--command',
-					dest='command',
-					action='store',
-					help='rsync,update,rollback,start,stop,restart')
-	options, args = parser.parse_args()
-	return options, args
 
 def parseHost(host, **args):
 	hostcnf = os.path.join('%s' % cwd,'confs','server.yaml')
@@ -51,14 +34,14 @@ class BR:
 		self.backDir = BACK_DIR + today.isoformat()
 		self.p_back = self.backDir + '/' + destDir.split('/')[-2] + '/'
 
-	def backup(self, project, destDir, exclude):
+	def backup(self, project, destDir):
 		if not os.path.exists(self.backDir):
 			os.makedirs(self.backDir)
-		rsync = "rsync -avp --delete --exclude={%s} %s %s" % (exclude, destDir, self.p_back)
+		rsync = "rsync -avp --delete %s %s" % (destDir, self.p_back)
 		os.system(rsync)
 		
-	def rollback(self, project, destDir, exclude):
-		rsync = "rsync -avp --delete --exclude={%s} %s %s" % (exclude, self.p_back, destDir)
+	def rollback(self, project, destDir):
+		rsync = "rsync -avp --delete %s %s" % (self.p_back, destDir)
 		os.system(rsync)
 
 def rsync(testServer,destDir,exclude):
@@ -109,6 +92,21 @@ def update(hostname, project, exclude, destDir, tmpDir, env):
 	os.system(salt)
 
 def main():
+	parser = OptionParser()
+	parser.add_option('-p','--porject',
+					dest='project',
+					action='store',
+					help='order,temorder')
+	parser.add_option('-l','--host',
+					dest='host',
+					action='store',
+					help='host')
+	parser.add_option('-c','--command',
+					dest='command',
+					action='store',
+					help='rsync,update,rollback,start,stop,restart')
+	options, args = parser.parse_args()
+
 	host = options.host
 	project = options.project
 	cmd = options.command
@@ -116,13 +114,15 @@ def main():
 	env = dirinfo.get(project)['type']
 	destDir = dirinfo[project]['dest'][:] 
 	exclude = ','.join(dirinfo.get(project)['exclude'].split(' '))
+
 	if cmd == 'rsync':
 		br = BR(project, destDir)
-		testServer = '192.168.11.110'
-		br.backup(project, destDir, exclude)
+		br.backup(project, destDir)
 		if env == 'www':
+			testServer = '192.168.11.110'
 			rsync(testServer, destDir, exclude)
 		elif env == 'tomcat':
+			testServer = '192.168.11.110'
 			rsync(testServer, destDir, exclude)
 	elif cmd == 'update':
 		hostname = parseHost(host)
@@ -130,7 +130,7 @@ def main():
 		update(hostname, project, exclude, destDir, tmpDir, env)
 	elif cmd == 'rollback':
 		br = BR(project, destDir)
-		br.rollback(project, destDir, exclude)
+		br.rollback(project, destDir)
 	elif cmd == 'stop':
 		if env == 'tomcat':
 			hostname = parseHost(host)
@@ -147,7 +147,6 @@ def main():
 	else:
 		print "未知命令!\n请使用 %s -h 查看帮助信息" % __file__
 		sys.exit(1)
-
+	
 if __name__ == "__main__":
-	options, args = opt()
 	main()
