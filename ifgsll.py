@@ -108,8 +108,7 @@ def update(hostname, project, exclude, destDir, tmpDir, env):
 	salt = 'salt "%s" state.sls %s %s' % (hostname, project, env)
 	os.system(salt)
 
-if __name__ == "__main__":
-	options, args = opt()
+def main():
 	host = options.host
 	project = options.project
 	cmd = options.command
@@ -148,3 +147,7 @@ if __name__ == "__main__":
 	else:
 		print "未知命令!\n请使用 %s -h 查看帮助信息" % __file__
 		sys.exit(1)
+
+if __name__ == "__main__":
+	options, args = opt()
+	main()
