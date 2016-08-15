@@ -1,4 +1,4 @@
-[Deploytool](./deploytool)
+Deploytool
 
 TODO：
 
