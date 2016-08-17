@@ -27,6 +27,67 @@ def parseProject(project, **args):
 	dirinfo = yaml.load(file(projCNF))
 	return dirinfo
 
+def _save2file(context, target_file):
+	if os.path.exists(target_file):
+		print "配置已存在，请检查"
+		sys.exit(1)
+	with open(target_file, 'w') as target_handle:
+		target_handle.write(context)
+
+def init_conf(project, _type):
+	projCNF = os.path.join('%s' % cwd,'confs','projects','%s.yaml' % project)
+	projSLS = "/srv/salt/%s/%s.sls" % (_type, project)
+	www_cnf = """%s:
+  type: wwwroot
+  dest: /home/wwwroot/%s.iclassedu.com/
+  tmp: /srv/salt/wwwroot/files/%s.iclassedu.com/
+	"""% (project, project, project)
+	webuser_cnf = """%s:
+  type: webuser
+  dest: /home/webuser/%s/
+  tmp: /srv/salt/webuser/files/%s/
+  exclude:
+    conf
+    logs
+    *.pid
+	"""
+	www_sls = """/home/wwwroot/%s.iclassedu.com/:
+  file.recurse:
+    - source: salt://files/%s.iclassedu.com/
+    - file_mode: 644
+    - dir_mode: 755
+    - makedir: True
+    - include_empty: True
+    - clean: True
+	"""% (project, project)
+	webuser_sls = """/home/webuser/%s/:
+  file.recurse:
+    - source: salt://files/%s/
+    - makedir: True
+    - include_empty: True
+    - clean: True
+/home/webuser/%s/bin/:
+  file.directory:
+    - dir_mode: 755
+    - file_mode: 755
+    - recurse:
+      - mode
+stop:
+  cmd.run:
+    - name: /home/webuser/%s/bin/shutdown.sh
+    - user: root
+start:
+  cmd.run:
+    - name: /home/webuser/%s/bin/startup.sh
+    - user: root
+	"""% (project, project, project, project, project)
+	if _type == "wwwroot":
+		_save2file(www_cnf, projCNF)
+		_save2file(www_sls, projSLS )
+	if _type == "webuser":
+		_save2file(webuser_cnf, projCNF)
+		_save2file(webuser_sls, projSLS)
+
 class BR:
 	def __init__(self, project, destDir, **kw):
 		import datetime
@@ -57,7 +118,7 @@ def getPID(host, project):
 	p = Popen(salt_cmd, stdout=PIPE, stderr=PIPE, shell=True)
 	stdout, stderr = p.communicate()
 	if stderr.split(': ')[0] != 'ERROR':
-		pid = stdout.split('\n')[1].strip().split(' ')[5]
+		pid = stdout.split('\n')[1].strip().split(' ')[6]
 		return pid
 	else:
 		print "程序未运行。"
@@ -105,27 +166,36 @@ def main():
 	parser.add_option('-c','--command',
 					dest='command',
 					action='store',
-					help='rsync,update,rollback,start,stop,restart')
+					help='rsync,update,rollback,start,stop,restart,init')
+	parser.add_option('-t','--type',
+					dest='type',
+					action='store',
+					help='wwwroot,webuser')
 	options, args = parser.parse_args()
 
 	host = options.host
 	project = options.project
 	cmd = options.command
-	dirinfo = parseProject(project)
-	env = dirinfo.get(project)['type']
-	destDir = dirinfo[project]['dest'][:] 
-	exclude = ','.join(dirinfo.get(project)['exclude'].split(' '))
+	_type = options.type
+	if not cmd == "init":
+		dirinfo = parseProject(project)
+		env = dirinfo.get(project)['type']
+		destDir = dirinfo[project]['dest'][:] 
+		exclude = ','.join(dirinfo.get(project)['exclude'].split(' '))
 
 	if cmd == 'rsync':
 		br = BR(project, destDir)
 		br.backup(project, destDir)
-		if env == 'www':
+		if env == 'wwwroot':
 			testServer = '192.168.11.110'
 			rsync(testServer, destDir, exclude)
-		elif env == 'tomcat':
+		elif env == 'webuser':
 			testServer = '192.168.11.110'
 			rsync(testServer, destDir, exclude)
 	elif cmd == 'update':
+		if host == None:
+			print "请指定host"
+			sys.exit(1)
 		hostname = parseHost(host)
 		tmpDir = dirinfo.get(project)['tmp']
 		update(hostname, project, exclude, destDir, tmpDir, env)
@@ -145,6 +215,8 @@ def main():
 			hostname = parseHost(host)
 			stopTomcat(hostname, destDir)
 			startTomcat(hostname, destDir)
+	elif cmd == 'init':
+		init_conf(project, _type)
 	else:
 		print "未知命令!\n请使用 %s -h 查看帮助信息" % __file__
 		sys.exit(1)

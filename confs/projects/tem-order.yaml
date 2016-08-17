@@ -1,0 +1,9 @@
+%s:
+  type: webuser
+  dest: /home/webuser/%s/
+  tmp: /srv/salt/webuser/files/%s/
+  exclude:
+    conf
+    logs
+    *.pid
+	

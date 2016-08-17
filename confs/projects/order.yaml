@@ -1,5 +1,5 @@
 order:
-  type: www
+  type: wwwroot
   dest: /home/wwwroot/order.iclassedu.com/
   tmp: /srv/salt/wwwroot/files/order.iclassedu.com/
   exclude:
