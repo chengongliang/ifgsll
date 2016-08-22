@@ -29,10 +29,12 @@ def parseProject(project, **args):
 
 def _save2file(context, target_file):
 	if os.path.exists(target_file):
-		print "配置已存在，请检查"
+		print "%s 配置已存在，请检查" % target_file
 		sys.exit(1)
-	with open(target_file, 'w') as target_handle:
-		target_handle.write(context)
+	else: 
+		with open(target_file, 'w') as target_handle:
+			target_handle.write(context)
+		print "%s 创建成功" % target_file
 
 def init_conf(project, _type):
 	projCNF = os.path.join('%s' % cwd,'confs','projects','%s.yaml' % project)
@@ -41,7 +43,7 @@ def init_conf(project, _type):
   type: wwwroot
   dest: /home/wwwroot/%s.iclassedu.com/
   tmp: /srv/salt/wwwroot/files/%s.iclassedu.com/
-	"""% (project, project, project)
+"""% (project, project, project)
 	webuser_cnf = """%s:
   type: webuser
   dest: /home/webuser/%s/
@@ -50,7 +52,7 @@ def init_conf(project, _type):
     conf
     logs
     *.pid
-	"""
+"""
 	www_sls = """/home/wwwroot/%s.iclassedu.com/:
   file.recurse:
     - source: salt://files/%s.iclassedu.com/
@@ -59,7 +61,7 @@ def init_conf(project, _type):
     - makedir: True
     - include_empty: True
     - clean: True
-	"""% (project, project)
+"""% (project, project)
 	webuser_sls = """/home/webuser/%s/:
   file.recurse:
     - source: salt://files/%s/
@@ -80,11 +82,11 @@ start:
   cmd.run:
     - name: /home/webuser/%s/bin/startup.sh
     - user: root
-	"""% (project, project, project, project, project)
+"""% (project, project, project, project, project)
 	if _type == "wwwroot":
 		_save2file(www_cnf, projCNF)
 		_save2file(www_sls, projSLS )
-	if _type == "webuser":
+	elif _type == "webuser":
 		_save2file(webuser_cnf, projCNF)
 		_save2file(webuser_sls, projSLS)
 
