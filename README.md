@@ -1,4 +1,4 @@
-Deploytool
+Deploytool(demo)
 
 TODO：
 
