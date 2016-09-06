@@ -133,6 +133,7 @@ def startTomcat(hostname, destDir):
 	binPath = destDir + "bin"
 	cmd = "sh %s/startup.sh" % binPath
 	cmd_run = "salt '%s' cmd.run '%s'" % (hostname, cmd)
+	print cmd_run
 	project = destDir.split('/')[-2]
 	try:
 		os.system(cmd_run)
@@ -163,7 +164,7 @@ def main():
 	parser.add_option('-p','--porject',
 					dest='project',
 					action='store',
-					help='order,temorder')
+					help='order,tem-order')
 	parser.add_option('-l','--host',
 					dest='host',
 					action='store',
@@ -208,15 +209,16 @@ def main():
 		br = BR(project, destDir)
 		br.rollback(project, destDir)
 	elif cmd == 'stop':
-		if env == 'tomcat':
+		if env == 'webuser':
 			hostname = parseHost(host)
 			stopTomcat(hostname, destDir)
 	elif cmd == 'start':
-		if env == 'tomcat':
+		if env == 'webuser':
 			hostname = parseHost(host)
+			print hostname
 			startTomcat(hostname, destDir)
 	elif cmd == 'restart':
-		if env == 'tomcat':
+		if env == 'webuser':
 			hostname = parseHost(host)
 			stopTomcat(hostname, destDir)
 			startTomcat(hostname, destDir)

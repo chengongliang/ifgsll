@@ -1,0 +1,8 @@
+tem-witkey:
+  type: webuser
+  dest: /home/webuser/tem-witkey/
+  tmp: /srv/salt/webuser/files/tem-witkey/
+  exclude:
+    conf
+    logs
+    *.pid
