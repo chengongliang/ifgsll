@@ -52,7 +52,7 @@ def init_conf(project, _type):
     conf
     logs
     *.pid
-"""
+"""% (project, project, project)
 	www_sls = """/home/wwwroot/%s.iclassedu.com/:
   file.recurse:
     - source: salt://files/%s.iclassedu.com/
@@ -89,6 +89,9 @@ start:
 	elif _type == "webuser":
 		_save2file(webuser_cnf, projCNF)
 		_save2file(webuser_sls, projSLS)
+	else:
+		print "类型错误(wwwroot|webuser)"
+		sys.exit(1)
 
 class BR:
 	def __init__(self, project, destDir, **kw):
