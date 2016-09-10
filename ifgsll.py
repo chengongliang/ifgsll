@@ -155,17 +155,19 @@ def update(hostname, project, exclude, destDir, tmpDir, env):
 	Host = salt_info.keys()[0]
 	comment = dic.get('comment')
 	result = dic.get('result')
+	path = dic.get('name')
 	starttime = dic.get('start_time')
 	changes = dic.get('changes')
 	duration = dic.get('duration')
 	info = """Hostname: %s
 Project: %s
 Result: %s
-Comment: %s
-Changes: %s
 Duration: %s
 Start_time: %s
-"""% (Host, project, result, comment, changes, duration, starttime)
+Path: %s
+Comment: %s
+Changes: %s
+"""% (Host, project, result, duration, starttime, path, comment, changes)
 	print info
 
 def main():
