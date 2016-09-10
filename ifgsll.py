@@ -5,9 +5,11 @@
 import os
 import sys
 import yaml
+import salt.client
 from optparse import OptionParser
 
 cwd = os.getcwd()
+local = salt.client.LocalClient()
 
 def parseHost(host, **args):
 	hostcnf = os.path.join('%s' % cwd,'confs','server.yaml')
@@ -118,37 +120,30 @@ def rsync(testServer,destDir,exclude):
 	os.system(cmd)
 
 def getPID(host, project):
-	from subprocess import Popen, PIPE
-	salt_cmd = "salt '%s' cmd.run 'ps -ef|grep -v grep|grep %s'" % (host,project)
-	p = Popen(salt_cmd, stdout=PIPE, stderr=PIPE, shell=True)
-	stdout, stderr = p.communicate()
-	if stderr.split(': ')[0] != 'ERROR':
-		pid = stdout.split('\n')[1].strip().split(' ')[6]
-		return pid
+	cmd = "ps -ef|grep -v grep|grep %s" % project
+	salt_cmd = local.cmd(host,'cmd.run',[cmd])
+	if salt_cmd.values()[0] == '':
+		print "程序未运行."
+		sys.exit(0)
 	else:
-		print "程序未运行。"
-		sys.exit(1)
+		pid = salt_cmd.values()[0].replace('  ','').split(' ')[1]
+		return pid
 
 def startTomcat(hostname, destDir):
 	binPath = destDir + "bin"
 	cmd = "sh %s/startup.sh" % binPath
-	cmd_run = "salt '%s' cmd.run '%s'" % (hostname, cmd)
-	print cmd_run
+	print local.cmd(hostname,'cmd.run',[cmd])
 	project = destDir.split('/')[-2]
-	try:
-		os.system(cmd_run)
-		print "%s 已经启动" % project
-	except OSError, e:
-		print"启动失败!"
 
 def stopTomcat(hostname, destDir):
 	pid = getPID(hostname, destDir)
-	cmd = "salt '%s' cmd.run 'kill -9 %s'" % (hostname, pid)
-	os.system(cmd)
+	cmd = "kill -9 %s" % pid
+	local.cmd(hostname,'cmd.run',[cmd])
 	project = destDir.split('/')[-2]
+	print pid
 	try:
 		print "%s 的进程已停止,PID: %s" % (project, pid)
-	except OSError, e:
+	except Exception, e:
 		print "%s 停止失败" % project
 
 def update(hostname, project, exclude, destDir, tmpDir, env):
@@ -156,8 +151,7 @@ def update(hostname, project, exclude, destDir, tmpDir, env):
 	if not os.path.exists(tmpDir):
 		os.makedirs(tmpDir)
 	os.system(sync)
-	salt = 'salt "%s" state.sls %s %s' % (hostname, project, env)
-	os.system(salt)
+	print local.cmd(hostname,"state.sls",[project,env])
 
 def main():
 	parser = OptionParser()
