@@ -140,7 +140,6 @@ def stopTomcat(hostname, destDir):
 	cmd = "kill -9 %s" % pid
 	local.cmd(hostname,'cmd.run',[cmd])
 	project = destDir.split('/')[-2]
-	print pid
 	try:
 		print "%s 的进程已停止,PID: %s" % (project, pid)
 	except Exception, e:
@@ -151,7 +150,23 @@ def update(hostname, project, exclude, destDir, tmpDir, env):
 	if not os.path.exists(tmpDir):
 		os.makedirs(tmpDir)
 	os.system(sync)
-	print local.cmd(hostname,"state.sls",[project,env])
+	salt_info = local.cmd(hostname,"state.sls",[project,env])
+	dic = salt_info.values()[0].values()[0]
+	Host = salt_info.keys()[0]
+	comment = dic.get('comment')
+	result = dic.get('result')
+	starttime = dic.get('start_time')
+	changes = dic.get('changes')
+	duration = dic.get('duration')
+	info = """Hostname: %s
+Project: %s
+Result: %s
+Comment: %s
+Changes: %s
+Duration: %s
+Start_time: %s
+"""% (Host, project, result, comment, changes, duration, starttime)
+	print info
 
 def main():
 	parser = OptionParser()
