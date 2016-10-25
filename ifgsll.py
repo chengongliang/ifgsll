@@ -234,7 +234,11 @@ def main():
 			stopTomcat(hostname, destDir)
 			startTomcat(hostname, destDir)
 	elif cmd == 'init':
-		init_conf(project, _type)
+		if _type:
+			init_conf(project, _type)
+		else:
+			print "必须指定项目类型(wwwroot|webuser)"
+			sys.exit()
 	else:
 		print "未知命令!\n请使用 %s -h 查看帮助信息" % __file__
 		sys.exit(1)
