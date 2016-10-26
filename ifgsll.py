@@ -12,7 +12,7 @@ cwd = os.getcwd()
 local = salt.client.LocalClient()
 
 def parseHost(host, **args):
-	hostcnf = os.path.join('%s' % cwd,'confs','server.yaml')
+	hostcnf = os.path.join(cwd,'confs','server.yaml')
 	hostinfo = yaml.load(file(hostcnf))
 	for i in hostinfo:
 		if host in i.split('-'):
@@ -22,7 +22,7 @@ def parseHost(host, **args):
 		sys.exit(1)
 
 def parseProject(project, **args):
-	projCNF = os.path.join('%s' % cwd,'confs','projects','%s.yaml' % project)
+	projCNF = os.path.join(cwd,'confs','projects','%s.yaml' % project)
 	if not os.path.exists(projCNF):
 		print "%s 不存在或未配置" % project
 		sys.exit(1)
@@ -39,7 +39,7 @@ def _save2file(context, target_file):
 		print "%s 创建成功" % target_file
 
 def init_conf(project, _type):
-	projCNF = os.path.join('%s' % cwd,'confs','projects','%s.yaml' % project)
+	projCNF = os.path.join(cwd,'confs','projects','%s.yaml' % project)
 	projSLS = "/srv/salt/%s/%s.sls" % (_type, project)
 	www_cnf = """%s:
   type: wwwroot
