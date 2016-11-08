@@ -194,6 +194,11 @@ def main():
 	project = options.project
 	cmd = options.command
 	_type = options.type
+	
+	if not project:
+		os.system('%s --help'%__file__)
+		sys.exit()
+		
 	if not cmd == "init":
 		dirinfo = parseProject(project)
 		env = dirinfo.get(project)['type']
