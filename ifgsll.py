@@ -209,10 +209,10 @@ def main():
 		br = BR(project, destDir)
 		br.backup(project, destDir)
 		if env == 'wwwroot':
-			testServer = '192.168.11.110'
+			testServer = '192.168.1.210'
 			rsync(testServer, destDir, exclude)
 		elif env == 'webuser':
-			testServer = '192.168.11.110'
+			testServer = '192.168.1.210'
 			rsync(testServer, destDir, exclude)
 	elif cmd == 'update':
 		if host == None:
