@@ -43,8 +43,8 @@ def init_conf(project, _type):
 	projSLS = "/srv/salt/%s/%s.sls" % (_type, project)
 	www_cnf = """%s:
   type: wwwroot
-  dest: /home/wwwroot/%s.iclassedu.com/
-  tmp: /srv/salt/wwwroot/files/%s.iclassedu.com/
+  dest: /home/wwwroot/%s.test.com/
+  tmp: /srv/salt/wwwroot/files/%s.test.com/
 """% (project, project, project)
 	webuser_cnf = """%s:
   type: webuser
@@ -55,9 +55,9 @@ def init_conf(project, _type):
     logs
     *.pid
 """% (project, project, project)
-	www_sls = """/home/wwwroot/%s.iclassedu.com/:
+	www_sls = """/home/wwwroot/%s.test.com/:
   file.recurse:
-    - source: salt://files/%s.iclassedu.com/
+    - source: salt://files/%s.test.com/
     - file_mode: 644
     - dir_mode: 755
     - makedir: True
